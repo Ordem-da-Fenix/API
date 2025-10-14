@@ -4,4 +4,5 @@ __pycache__/
 serviceAccountKey.json
 *.env
 /.vscode/venv/
-_pycache__/
+app.log
+API_DOCUMENTATION.md
