@@ -5,28 +5,35 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-# Configurações fixas para o compressor de teste - 5 níveis
+# Configurações baseadas em Compressores Médios (15-37 kW) - 5 níveis
 CONFIGURACAO_FIXA = {
     "limites_pressao": {
-        "muito_baixo": {"min": 0.0, "max": 4.0},
-        "baixo": {"min": 4.0, "max": 6.0},
-        "normal": {"min": 6.0, "max": 8.0},
-        "alto": {"min": 8.0, "max": 9.0},
-        "critico": {"min": 9.0, "max": float('inf')}
+        "muito_baixo": {"min": 0.0, "max": 5.0},
+        "baixo": {"min": 5.0, "max": 7.0},
+        "normal": {"min": 7.0, "max": 10.0},
+        "alto": {"min": 10.0, "max": 11.0},
+        "critico": {"min": 11.0, "max": float('inf')}
     },
     "limites_temp_equipamento": {
-        "muito_baixo": {"min": 0.0, "max": 15.0},
-        "baixo": {"min": 15.0, "max": 25.0},
-        "normal": {"min": 25.0, "max": 70.0},
-        "alto": {"min": 70.0, "max": 85.0},
-        "critico": {"min": 85.0, "max": float('inf')}
+        "muito_baixo": {"min": 0.0, "max": 60.0},
+        "baixo": {"min": 60.0, "max": 71.0},
+        "normal": {"min": 71.0, "max": 82.0},
+        "alto": {"min": 82.0, "max": 107.0},
+        "critico": {"min": 107.0, "max": float('inf')}
     },
     "limites_temp_ambiente": {
+        "muito_baixo": {"min": -10.0, "max": 0.0},
+        "baixo": {"min": 0.0, "max": 10.0},
+        "normal": {"min": 10.0, "max": 29.0},
+        "alto": {"min": 29.0, "max": 46.0},
+        "critico": {"min": 46.0, "max": float('inf')}
+    },
+    "limites_potencia": {
         "muito_baixo": {"min": 0.0, "max": 10.0},
-        "baixo": {"min": 10.0, "max": 18.0},
-        "normal": {"min": 18.0, "max": 28.0},
-        "alto": {"min": 28.0, "max": 35.0},
-        "critico": {"min": 35.0, "max": float('inf')}
+        "baixo": {"min": 10.0, "max": 15.0},
+        "normal": {"min": 15.0, "max": 37.0},
+        "alto": {"min": 37.0, "max": 45.0},
+        "critico": {"min": 45.0, "max": float('inf')}
     }
 }
 
@@ -64,6 +71,12 @@ def gerar_alertas(sensor_data: SensorData) -> Dict[str, str]:
         CONFIGURACAO_FIXA["limites_temp_ambiente"]
     )
     
+    # Avaliar potência/consumo
+    alertas["potencia"] = avaliar_nivel(
+        sensor_data.potencia_kw, 
+        CONFIGURACAO_FIXA["limites_potencia"]
+    )
+    
     # Log dos alertas gerados
     alertas_anormais = {k: v for k, v in alertas.items() if v != "normal"}
     if alertas_anormais:
@@ -77,9 +90,35 @@ def obter_configuracao_fixa() -> Dict[str, Any]:
     """Retorna a configuração fixa do sistema."""
     return {
         "configuracao": CONFIGURACAO_FIXA,
-        "descricao": "Configuração fixa para compressor de teste",
-        "versao": "1.0",
+        "descricao": "Compressores Médios (15-37 kW) - Faixa intermediária ideal",
+        "categoria": "compressores_medios",
+        "faixa_potencia": "15-37 kW",
+        "versao": "1.1",
         "data_aplicacao": now_br(),
+        "especificacoes_gerais": {
+            "potencia_kw": {"minimo": 15, "maximo": 37, "ideal": 22},
+            "pressao_bar": {"minimo": 7, "maximo": 10, "padrao": 8.5},
+            "temperatura_equipamento": {
+                "minimo_operacional": 71,
+                "maximo_operacional": 82,
+                "maximo_seguro": 107,
+                "desligamento_automatico": 110
+            },
+            "temperatura_ambiente": {
+                "minimo_ideal": 10,
+                "maximo_ideal": 29,
+                "minimo_operacional": 0,
+                "maximo_operacional": 46
+            }
+        },
+        "vantagens": [
+            "Temperaturas operacionais mais baixas (71-82°C)",
+            "Limite térmico conservador (107°C)",
+            "Pressão universal 7-10 bar",
+            "Ciclo de trabalho 100% sem estresse térmico",
+            "Maior vida útil dos componentes",
+            "Melhor relação custo-benefício"
+        ],
         "niveis_alerta": {
             "muito_baixo": {"cor": "azul", "descricao": "Valor muito baixo - verificar funcionamento"},
             "baixo": {"cor": "amarelo", "descricao": "Valor baixo - monitorar operação"},

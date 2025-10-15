@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from .api.sensors import router as sensors_router
 from .api.compressores import router as compressores_router
 from .api.configuracoes import router as configuracoes_router
@@ -11,6 +12,27 @@ setup_logging()
 
 def create_app() -> FastAPI:
     app = FastAPI(title="API - Ordem da Fenix - Monitoramento Industrial")
+    
+    # Configurar CORS para permitir consumo via website local
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[
+            "http://localhost:3000",    # React dev server
+            "http://localhost:5500",    # Live Server (VS Code)
+            "http://127.0.0.1:5500",    # Live Server (VS Code) - IP
+            "http://localhost:8080",    # Vue/outros dev servers
+            "http://127.0.0.1:8080",    # Vue/outros dev servers - IP
+            "*"                         # Permitir todas as origens (desenvolvimento)
+        ],
+        allow_credentials=True,
+        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allow_headers=["*"],
+    )
+    
+    # Rota de health check
+    @app.get("/health")
+    async def health_check():
+        return {"status": "ok", "message": "API da Ordem da Fenix está funcionando!"}
     
     # Incluir routers
     app.include_router(sensors_router)
