@@ -29,6 +29,7 @@ def create_app() -> FastAPI:
         "http://127.0.0.1:8080",          # Vue/outros dev servers - IP
         "https://ordem-da-fenix.vercel.app",  # Frontend em produção (exemplo)
         "https://ordemdafenix.com.br",     # Domínio próprio (exemplo)
+        "https://ordem-da-fenix.github.io", # Frontend estático GitHub Pages
     ]
     
     # Em desenvolvimento, permitir todas as origens
