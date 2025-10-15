@@ -12,6 +12,7 @@ class CompressorData(BaseModel):
     configuracao: str = Field(default="Compressor Médio-Padrão", description="Configuração do compressor")
     data_ultima_manutencao: Optional[datetime] = Field(default=None, description="Data da última manutenção")
     esta_ligado: bool = Field(default=False, description="Status atual do compressor (ligado/desligado)")
+    data_ultima_atualizacao: Optional[datetime] = Field(default=None, description="Data da última atualização de status via sensor")
 
 
 class CompressorOut(CompressorData):
@@ -28,3 +29,4 @@ class CompressorUpdate(BaseModel):
     configuracao: Optional[str] = Field(default=None, description="Configuração do compressor")
     data_ultima_manutencao: Optional[datetime] = Field(default=None, description="Data da última manutenção")
     esta_ligado: Optional[bool] = Field(default=None, description="Status atual do compressor")
+    data_ultima_atualizacao: Optional[datetime] = Field(default=None, description="Data da última atualização de status via sensor")

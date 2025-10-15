@@ -41,6 +41,35 @@ async def atualizar_alertas_compressor(id_compressor: int, alertas: Dict[str, st
 		logger.error(f"Erro ao atualizar alertas do compressor {id_compressor}: {str(e)}")
 
 
+async def atualizar_status_compressor(id_compressor: int, esta_ligado: bool, data_medicao):
+	"""Atualiza o status (ligado/desligado) de um compressor específico no Firestore."""
+	try:
+		@handle_firestore_exceptions
+		def atualizar_status():
+			# Buscar o compressor
+			docs = list(db.collection("compressores").where("id_compressor", "==", id_compressor).limit(1).stream())
+			if not docs:
+				return False
+			
+			doc = docs[0]
+			# Atualizar com o novo status e data da última atualização
+			doc.reference.update({
+				"esta_ligado": esta_ligado,
+				"data_ultima_atualizacao": data_medicao
+			})
+			return True
+		
+		sucesso = await run_in_threadpool(atualizar_status)
+		if sucesso:
+			status_texto = "ligado" if esta_ligado else "desligado"
+			logger.info(f"Status do compressor {id_compressor} atualizado para: {status_texto}")
+		else:
+			logger.warning(f"Compressor {id_compressor} não encontrado para atualizar status")
+			
+	except Exception as e:
+		logger.error(f"Erro ao atualizar status do compressor {id_compressor}: {str(e)}")
+
+
 @router.post("/sensor")
 async def receive_sensor_data(data: SensorData):
 	"""Recebe e armazena dados do sensor no Firestore."""
@@ -73,11 +102,15 @@ async def receive_sensor_data(data: SensorData):
 		
 		doc_id = await run_in_threadpool(add_to_firestore)
 		
+		# Atualizar o status do compressor com o status do sensor
+		await atualizar_status_compressor(data.id_compressor, data.ligado, data_dict["data_medicao"])
+		
 		# Atualizar alertas do compressor baseado nesta leitura
 		alertas = gerar_alertas(data)
 		await atualizar_alertas_compressor(data.id_compressor, alertas)
 		
-		logger.info(f"Dados do sensor salvos com sucesso (ID: {doc_id}) e alertas atualizados: {alertas}")
+		status_texto = "ligado" if data.ligado else "desligado"
+		logger.info(f"Dados do sensor salvos com sucesso (ID: {doc_id}), status do compressor atualizado para: {status_texto}, alertas atualizados: {alertas}")
 	
 		return {
 			"status": "sucesso",
