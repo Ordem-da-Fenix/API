@@ -64,13 +64,22 @@ def log_operation(operation: str, entity_type: str, entity_id: Optional[str] = N
 
 def setup_logging():
     """Configura logging para a aplicação."""
+    import os
+    
+    # Definir nível de log baseado no ambiente
+    log_level = logging.DEBUG if os.getenv("ENVIRONMENT") == "development" else logging.INFO
+    
+    # Configurar handlers baseado no ambiente
+    handlers = [logging.StreamHandler()]
+    
+    # Em desenvolvimento local, também logar em arquivo
+    if os.getenv("ENVIRONMENT") == "development":
+        handlers.append(logging.FileHandler('app.log', encoding='utf-8'))
+    
     logging.basicConfig(
-        level=logging.INFO,
+        level=log_level,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        handlers=[
-            logging.StreamHandler(),
-            logging.FileHandler('app.log', encoding='utf-8')
-        ]
+        handlers=handlers
     )
     
     # Reduzir verbosidade de bibliotecas externas
