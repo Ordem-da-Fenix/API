@@ -34,6 +34,13 @@ CONFIGURACAO_FIXA = {
         "normal": {"min": 15.0, "max": 37.0},
         "alto": {"min": 37.0, "max": 45.0},
         "critico": {"min": 45.0, "max": float('inf')}
+    },
+    "limites_umidade": {
+        "muito_baixo": {"min": 0.0, "max": 20.0},
+        "baixo": {"min": 20.0, "max": 40.0},
+        "normal": {"min": 40.0, "max": 70.0},
+        "alto": {"min": 70.0, "max": 85.0},
+        "critico": {"min": 85.0, "max": 100.0}
     }
 }
 
@@ -77,6 +84,15 @@ def gerar_alertas(sensor_data: SensorData) -> Dict[str, str]:
         CONFIGURACAO_FIXA["limites_potencia"]
     )
     
+    # Avaliar umidade
+    alertas["umidade"] = avaliar_nivel(
+        sensor_data.umidade, 
+        CONFIGURACAO_FIXA["limites_umidade"]
+    )
+    
+    # Avaliar vibração (booleano - crítico se detectada)
+    alertas["vibracao"] = "critico" if sensor_data.vibracao else "normal"
+    
     # Log dos alertas gerados
     alertas_anormais = {k: v for k, v in alertas.items() if v != "normal"}
     if alertas_anormais:
@@ -109,6 +125,18 @@ def obter_configuracao_fixa() -> Dict[str, Any]:
                 "maximo_ideal": 29,
                 "minimo_operacional": 0,
                 "maximo_operacional": 46
+            },
+            "umidade_percentual": {
+                "minimo_ideal": 40,
+                "maximo_ideal": 70,
+                "minimo_operacional": 20,
+                "maximo_operacional": 85,
+                "critico": 85
+            },
+            "vibracao": {
+                "normal": "sem_vibracao_anormal",
+                "critico": "vibracao_detectada",
+                "descricao": "Detecção de vibração anormal indica possível problema mecânico"
             }
         },
         "vantagens": [

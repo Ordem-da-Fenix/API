@@ -72,7 +72,20 @@ async def atualizar_status_compressor(id_compressor: int, esta_ligado: bool, dat
 
 @router.post("/sensor")
 async def receive_sensor_data(data: SensorData):
-	"""Recebe e armazena dados do sensor no Firestore."""
+	"""
+	Recebe e armazena dados do sensor no Firestore.
+	
+	Parâmetros obrigatórios:
+	- id_compressor: ID único do compressor
+	- ligado: Status do compressor (ligado/desligado)
+	- pressao: Pressão atual em bar (≥0)
+	- temp_equipamento: Temperatura do equipamento em °C
+	- temp_ambiente: Temperatura ambiente em °C
+	- potencia_kw: Consumo de energia em kW (≥0)
+	- umidade: Percentual de umidade (0-100%)
+	- vibracao: Detecção de vibração anormal (true/false)
+	- data_medicao: Data da medição (opcional, preenchida automaticamente)
+	"""
 	logger.info(f"Recebendo dados do sensor para compressor {data.id_compressor}")
 	try:
 		# Verificar se o compressor existe

@@ -11,6 +11,8 @@ class SensorData(BaseModel):
     temp_equipamento: float = Field(..., description="Temperatura do equipamento em °C")
     temp_ambiente: float = Field(..., description="Temperatura ambiente em °C")
     potencia_kw: float = Field(..., ge=0, description="Consumo de energia em kW")
+    umidade: float = Field(..., ge=0, le=100, description="Percentual de umidade do ambiente em %")
+    vibracao: bool = Field(..., description="Detecção de vibração anormal (true=detectada, false=normal)")
     data_medicao: Optional[datetime] = Field(default=None, description="Data e hora da medição (opcional, será preenchida automaticamente se não informada)")
 
 
