@@ -140,12 +140,12 @@ async def update_esp32_alertas(data: ESP32AlertasData):
 	
 	Parâmetros obrigatórios:
 	- id_compressor: ID único do compressor
-	- alerta_potencia: Nível de alerta para potência
-	- alerta_pressao: Nível de alerta para pressão
-	- alerta_temperatura_ambiente: Nível de alerta para temperatura ambiente
-	- alerta_temperatura_equipamento: Nível de alerta para temperatura equipamento
-	- alerta_umidade: Nível de alerta para umidade
-	- alerta_vibracao: Nível de alerta para vibração
+	- alerta_potencia: Nível de alerta para potência (3 níveis)
+	- alerta_pressao: Nível de alerta para pressão (3 níveis)
+	- alerta_temperatura_ambiente: Nível de alerta para temperatura ambiente (3 níveis)
+	- alerta_temperatura_equipamento: Nível de alerta para temperatura equipamento (3 níveis)
+	- alerta_umidade: Nível de alerta para umidade (3 níveis)
+	- vibracao: Status de vibração (true=detectada, false=normal)
 	- data_medicao: Data da medição (opcional, preenchida automaticamente)
 	"""
 	logger.info(f"Atualizando alertas do ESP32 para compressor {data.id_compressor}")
@@ -174,7 +174,7 @@ async def update_esp32_alertas(data: ESP32AlertasData):
 			"temperatura_ambiente": data.alerta_temperatura_ambiente.value,
 			"temperatura_equipamento": data.alerta_temperatura_equipamento.value,
 			"umidade": data.alerta_umidade.value,
-			"vibracao": data.alerta_vibracao.value
+			"vibracao": "detectada" if data.vibracao else "normal"
 		}
 		
 		# Atualizar alertas do compressor com os dados do ESP32

@@ -53,7 +53,8 @@ Sistema simplificado baseado em alertas pré-calculados pelo ESP32:
 - **3 Níveis Simples**: `abaixo_do_normal`, `normal`, `acima_do_normal`
 - **Atualização Direta**: Apenas alertas são atualizados no compressor
 - **Sem Dados de Medição**: ESP32 não salva medições, apenas alertas
-- **6 Parâmetros de Alerta**: potência, pressão, temperatura_ambiente, temperatura_equipamento, umidade, vibração
+- **5 Parâmetros de Alerta**: potência, pressão, temperatura_ambiente, temperatura_equipamento, umidade (3 níveis cada)
+- **1 Parâmetro Booleano**: vibração (true=detectada, false=normal)
 
 ### 🔧 **Parâmetros Monitorados**
 
@@ -85,9 +86,10 @@ O sistema monitora **7 parâmetros** dos compressores industriais:
 - **Monitoramento**: Sensor de umidade ambiental
 
 #### **🔧 Vibração**
-- **Estados**: Normal / Anormal
-- **Detecção**: Sensor de vibração mecânica
-- **Indicador**: Possíveis problemas mecânicos
+- **Estados**: Normal (sem vibração) / Crítico (vibração detectada)
+- **Detecção**: Sensor de vibração mecânica (booleano)
+- **Indicador**: Vibração = problema mecânico detectado
+- **Alertas**: Apenas 2 níveis - normal 🟢 ou crítico 🔴
 
 #### **🔄 Status Liga/Desliga**
 - **Estados**: Ligado / Desligado
@@ -104,6 +106,10 @@ O sistema monitora **7 parâmetros** dos compressores industriais:
 - 🟦 **Abaixo do Normal**: Valores abaixo do esperado
 - 🟢 **Normal**: Operação ideal 
 - 🟠 **Acima do Normal**: Valores elevados, requer atenção
+
+**Vibração (Parâmetro Especial)**:
+- 🟢 **Normal**: Sem vibração anormal detectada
+- 🔴 **Crítico**: Vibração anormal detectada (problema mecânico)
 
 ---
 
@@ -177,7 +183,7 @@ POST /esp32/alertas                    # Atualizar alertas do ESP32
   "alerta_temperatura_ambiente": "normal",
   "alerta_temperatura_equipamento": "normal",
   "alerta_umidade": "abaixo_do_normal",
-  "alerta_vibracao": "normal",
+  "vibracao": false,
   "data_medicao": "2025-10-20T10:30:00-03:00"
 }
 ```
