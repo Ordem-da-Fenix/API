@@ -27,13 +27,14 @@
 
 ### 📊 **Sistema de Monitoramento Avançado**
 - ✅ Coleta de dados de sensores em tempo real
-- ✅ **7 parâmetros monitorados:**
+- ✅ **8 parâmetros monitorados:**
   - Pressão (0-15 bar)
   - Temperatura do equipamento (60-110°C)
   - Temperatura ambiente (-10 a 50°C)
   - Potência/Consumo (15-45 kW)
   - Umidade ambiente (0-100%)
   - Vibração anormal (detecção booleana)
+  - Corrente elétrica (0-50 A)
   - Status liga/desliga automático
 - ✅ Histórico completo de medições
 - ✅ Filtros por compressor e período
@@ -53,7 +54,7 @@ Sistema simplificado baseado em alertas pré-calculados pelo ESP32:
 - **3 Níveis Simples**: `abaixo_do_normal`, `normal`, `acima_do_normal`
 - **Atualização Direta**: Apenas alertas são atualizados no compressor
 - **Sem Dados de Medição**: ESP32 não salva medições, apenas alertas
-- **5 Parâmetros de Alerta**: potência, pressão, temperatura_ambiente, temperatura_equipamento, umidade (3 níveis cada)
+- **6 Parâmetros de Alerta**: potência, pressão, temperatura_ambiente, temperatura_equipamento, umidade, corrente (3 níveis cada)
 - **1 Parâmetro Booleano**: vibração (true=detectada, false=normal)
 
 ### 🔧 **Parâmetros Monitorados**
@@ -89,6 +90,12 @@ O sistema monitora **7 parâmetros** dos compressores industriais:
 - **Estados**: Normal (sem vibração) / Crítico (vibração detectada)
 - **Detecção**: Sensor de vibração mecânica (booleano)
 - **Indicador**: Vibração = problema mecânico detectado
+
+#### **⚡ Corrente Elétrica (A)**
+- **Faixa de Operação**: 0-50 A
+- **Ideal para Compressores**: Conforme especificação do motor
+- **Monitoramento**: Medição de corrente do motor principal
+- **Indicador**: Sobrecarga, eficiência energética e manutenção preditiva
 - **Alertas**: Apenas 2 níveis - normal 🟢 ou crítico 🔴
 
 #### **🔄 Status Liga/Desliga**

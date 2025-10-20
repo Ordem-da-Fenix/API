@@ -21,6 +21,7 @@ class SensorData(BaseModel):
     potencia_kw: float = Field(..., ge=0, description="Consumo de energia em kW")
     umidade: float = Field(..., ge=0, le=100, description="Percentual de umidade do ambiente em %")
     vibracao: bool = Field(..., description="Detecção de vibração anormal (true=detectada, false=normal)")
+    corrente: float = Field(..., ge=0, description="Corrente elétrica em amperes (A)")
     data_medicao: Optional[datetime] = Field(default=None, description="Data e hora da medição (opcional, será preenchida automaticamente se não informada)")
 
 
@@ -28,12 +29,13 @@ class ESP32AlertasData(BaseModel):
     """Modelo para atualização de alertas do ESP32 no compressor."""
     id_compressor: int = Field(..., gt=0, description="ID único do compressor (número inteiro positivo)")
     
-    # Alertas calculados pelo ESP32 (5 parâmetros)
+    # Alertas calculados pelo ESP32 (6 parâmetros)
     alerta_potencia: NivelAlerta = Field(..., description="Nível de alerta para potência")
     alerta_pressao: NivelAlerta = Field(..., description="Nível de alerta para pressão")
     alerta_temperatura_ambiente: NivelAlerta = Field(..., description="Nível de alerta para temperatura ambiente")
     alerta_temperatura_equipamento: NivelAlerta = Field(..., description="Nível de alerta para temperatura equipamento")
     alerta_umidade: NivelAlerta = Field(..., description="Nível de alerta para umidade")
+    alerta_corrente: NivelAlerta = Field(..., description="Nível de alerta para corrente elétrica")
     
     # Vibração é apenas booleano (true=vibrando, false=normal)
     vibracao: bool = Field(..., description="Detecção de vibração anormal (true=detectada, false=normal)")

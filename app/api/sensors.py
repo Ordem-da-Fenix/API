@@ -83,6 +83,7 @@ async def receive_sensor_data(data: SensorData):
 	- potencia_kw: Consumo de energia em kW (≥0)
 	- umidade: Percentual de umidade (0-100%)
 	- vibracao: Detecção de vibração anormal (true/false)
+	- corrente: Corrente elétrica em amperes (≥0)
 	- data_medicao: Data da medição (opcional, preenchida automaticamente)
 	"""
 	logger.info(f"Recebendo dados do sensor para compressor {data.id_compressor}")
@@ -145,6 +146,7 @@ async def update_esp32_alertas(data: ESP32AlertasData):
 	- alerta_temperatura_ambiente: Nível de alerta para temperatura ambiente (3 níveis)
 	- alerta_temperatura_equipamento: Nível de alerta para temperatura equipamento (3 níveis)
 	- alerta_umidade: Nível de alerta para umidade (3 níveis)
+	- alerta_corrente: Nível de alerta para corrente elétrica (3 níveis)
 	- vibracao: Status de vibração (true=detectada, false=normal)
 	- data_medicao: Data da medição (opcional, preenchida automaticamente)
 	"""
@@ -174,6 +176,7 @@ async def update_esp32_alertas(data: ESP32AlertasData):
 			"temperatura_ambiente": data.alerta_temperatura_ambiente.value,
 			"temperatura_equipamento": data.alerta_temperatura_equipamento.value,
 			"umidade": data.alerta_umidade.value,
+			"corrente": data.alerta_corrente.value,
 			"vibracao": "detectada" if data.vibracao else "normal"
 		}
 		
