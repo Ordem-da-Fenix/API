@@ -39,57 +39,71 @@
 - ✅ Filtros por compressor e período
 - ✅ Atualização automática do status do compressor
 
-### 🚨 **Sistema de Alertas Inteligente (5 Níveis)**
-Sistema avançado baseado em parâmetros industriais reais:
+### 🚨 **Sistema de Alertas Inteligente (3 Níveis) - ESP32**
+Sistema simplificado baseado em alertas pré-calculados pelo ESP32:
 
-| Nível | Cor | Faixa | Descrição | Ação Requerida |
-|-------|-----|-------|-----------|----------------|
-| 🔵 **Muito Baixo** | Azul | 0-20% | Parâmetros muito abaixo | Verificação de funcionamento |
-| 🟡 **Baixo** | Amarelo | 20-40% | Performance reduzida | Monitoramento contínuo |
-| 🟢 **Normal** | Verde | 40-70% | Operação ideal | Nenhuma ação necessária |
-| 🟠 **Alto** | Laranja | 70-85% | Parâmetros elevados | Atenção necessária |
-| 🔴 **Crítico** | Vermelho | 85-100% | Risco de falha | **Intervenção Imediata** |
+| Nível | Cor | Descrição | Ação Requerida |
+|-------|-----|-----------|----------------|
+| � **Abaixo do Normal** | Azul | Parâmetros abaixo do esperado | Verificação de funcionamento |
+|  **Normal** | Verde | Operação ideal | Nenhuma ação necessária |
+| 🟠 **Acima do Normal** | Laranja | Parâmetros elevados | Monitoramento necessário |
 
-### 🔧 **Parâmetros Detalhados**
+### 🤖 **Integração ESP32**
+- **Alertas Pré-calculados**: ESP32 calcula alertas localmente
+- **3 Níveis Simples**: `abaixo_do_normal`, `normal`, `acima_do_normal`
+- **Atualização Direta**: Apenas alertas são atualizados no compressor
+- **Sem Dados de Medição**: ESP32 não salva medições, apenas alertas
+- **6 Parâmetros de Alerta**: potência, pressão, temperatura_ambiente, temperatura_equipamento, umidade, vibração
 
-#### **Pressão (bar)**
-- Muito Baixo: 0.0 - 5.0
-- Baixo: 5.0 - 7.0  
-- **Normal: 7.0 - 10.0** ✅
-- Alto: 10.0 - 11.0
-- Crítico: > 11.0
+### 🔧 **Parâmetros Monitorados**
 
-#### **Temperatura Equipamento (°C)**
-- Muito Baixo: 0 - 60
-- Baixo: 60 - 71
-- **Normal: 71 - 82** ✅
-- Alto: 82 - 107
-- Crítico: > 107
+O sistema monitora **7 parâmetros** dos compressores industriais:
 
-#### **Temperatura Ambiente (°C)**
-- Muito Baixo: -10 - 0
-- Baixo: 0 - 10
-- **Normal: 10 - 29** ✅
-- Alto: 29 - 46
-- Crítico: > 46
+#### **📊 Pressão (bar)**
+- **Faixa de Operação**: 0-15 bar
+- **Ideal para Compressores**: 7-10 bar
+- **Monitoramento**: Contínuo via sensores de pressão
 
-#### **Potência/Consumo (kW)**
-- Muito Baixo: 0 - 10
-- Baixo: 10 - 15
-- **Normal: 15 - 37** ✅
-- Alto: 37 - 45
-- Crítico: > 45
+#### **🌡️ Temperatura do Equipamento (°C)**
+- **Faixa de Operação**: 60-110°C
+- **Ideal para Compressores**: 71-82°C
+- **Monitoramento**: Sensor interno do compressor
 
-#### **Umidade (%)**
-- Muito Baixo: 0 - 20 (muito seco)
-- Baixo: 20 - 40 (seco)
-- **Normal: 40 - 70** ✅
-- Alto: 70 - 85 (úmido)
-- Crítico: 85 - 100 (risco condensação)
+#### **🌡️ Temperatura Ambiente (°C)**
+- **Faixa de Operação**: -10 a 50°C
+- **Ideal para Operação**: 10-29°C
+- **Monitoramento**: Sensor ambiental
 
-#### **Vibração**
-- **Normal**: Sem vibração anormal detectada ✅
-- **Crítico**: Vibração anormal detectada (problema mecânico)
+#### **⚡ Potência/Consumo (kW)**
+- **Faixa do Sistema**: 15-37 kW (compressores médios)
+- **Consumo Ideal**: Conforme especificação do equipamento
+- **Monitoramento**: Medição de consumo elétrico
+
+#### **💧 Umidade Ambiente (%)**
+- **Faixa de Operação**: 0-100%
+- **Ideal para Compressores**: 40-70%
+- **Monitoramento**: Sensor de umidade ambiental
+
+#### **🔧 Vibração**
+- **Estados**: Normal / Anormal
+- **Detecção**: Sensor de vibração mecânica
+- **Indicador**: Possíveis problemas mecânicos
+
+#### **🔄 Status Liga/Desliga**
+- **Estados**: Ligado / Desligado
+- **Atualização**: Automática via dados do sensor
+- **Controle**: Status em tempo real do compressor
+
+### 🎯 **Sistema de Alertas**
+
+**Para o Sensor Tradicional**: O sistema calcula automaticamente os alertas baseado nos valores recebidos.
+
+**Para o ESP32**: Os alertas são pré-calculados pelo dispositivo e enviados prontos para o sistema.
+
+**3 Níveis de Alerta**:
+- 🟦 **Abaixo do Normal**: Valores abaixo do esperado
+- 🟢 **Normal**: Operação ideal 
+- 🟠 **Acima do Normal**: Valores elevados, requer atenção
 
 ---
 
@@ -133,6 +147,11 @@ GET  /dados/{id_compressor}            # Dados de compressor específico
 GET  /dados/{id_compressor}?limit=10   # Últimos N registros
 ```
 
+### 🤖 **ESP32 - Alertas**
+```http
+POST /esp32/alertas                    # Atualizar alertas do ESP32
+```
+
 ---
 
 ## 🔄 **Fluxo de Funcionamento**
@@ -147,6 +166,21 @@ GET  /dados/{id_compressor}?limit=10   # Últimos N registros
 4. **Consulta**: Frontend acessa dados via GET endpoints
 
 ---
+
+## 📡 **Modelo de Dados do ESP32**
+
+```json
+{
+  "id_compressor": 1001,
+  "alerta_potencia": "normal",
+  "alerta_pressao": "acima_do_normal",
+  "alerta_temperatura_ambiente": "normal",
+  "alerta_temperatura_equipamento": "normal",
+  "alerta_umidade": "abaixo_do_normal",
+  "alerta_vibracao": "normal",
+  "data_medicao": "2025-10-20T10:30:00-03:00"
+}
+```
 
 ## 📡 **Modelo de Dados do Sensor**
 
@@ -485,9 +519,9 @@ Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para detalhes.
 ![Version](https://img.shields.io/badge/version-1.0.0-blue)
 
 ### **Última Atualização**
-- **Data:** 17 de outubro de 2025
-- **Versão:** 1.0.0
-- **Features:** Sistema completo de monitoramento com 7 parâmetros
+- **Data:** 20 de outubro de 2025
+- **Versão:** 2.0.0
+- **Features:** Sistema ESP32 com alertas pré-calculados + 3 níveis simplificados
 - **Status:** ✅ Em produção estável
 
 ---

@@ -1,10 +1,9 @@
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.concurrency import run_in_threadpool
-from ..models.sensor import SensorData, SensorOut
+from ..models.sensor import SensorData, SensorOut, ESP32AlertasData, ESP32AlertasOut
 from ..db.firebase import db
 from ..utils.datetime_utils import now_br
 from ..utils.error_handling import handle_firestore_exceptions
-from ..utils.alertas import gerar_alertas
 from typing import List, Optional, Dict
 import logging
 
@@ -118,12 +117,8 @@ async def receive_sensor_data(data: SensorData):
 		# Atualizar o status do compressor com o status do sensor
 		await atualizar_status_compressor(data.id_compressor, data.ligado, data_dict["data_medicao"])
 		
-		# Atualizar alertas do compressor baseado nesta leitura
-		alertas = gerar_alertas(data)
-		await atualizar_alertas_compressor(data.id_compressor, alertas)
-		
 		status_texto = "ligado" if data.ligado else "desligado"
-		logger.info(f"Dados do sensor salvos com sucesso (ID: {doc_id}), status do compressor atualizado para: {status_texto}, alertas atualizados: {alertas}")
+		logger.info(f"Dados do sensor salvos com sucesso (ID: {doc_id}), status do compressor atualizado para: {status_texto}")
 	
 		return {
 			"status": "sucesso",
@@ -135,6 +130,66 @@ async def receive_sensor_data(data: SensorData):
 	except Exception as e:
 		logger.error(f"Erro inesperado ao salvar dados do sensor: {str(e)}")
 		raise HTTPException(status_code=500, detail=f"Erro ao salvar dados do sensor: {str(e)}")
+
+
+@router.post("/esp32/alertas", response_model=ESP32AlertasOut)
+async def update_esp32_alertas(data: ESP32AlertasData):
+	"""
+	Atualiza apenas os alertas do compressor baseado nos dados do ESP32.
+	NÃO salva novos dados de medição, apenas atualiza os alertas no documento do compressor.
+	
+	Parâmetros obrigatórios:
+	- id_compressor: ID único do compressor
+	- alerta_potencia: Nível de alerta para potência
+	- alerta_pressao: Nível de alerta para pressão
+	- alerta_temperatura_ambiente: Nível de alerta para temperatura ambiente
+	- alerta_temperatura_equipamento: Nível de alerta para temperatura equipamento
+	- alerta_umidade: Nível de alerta para umidade
+	- alerta_vibracao: Nível de alerta para vibração
+	- data_medicao: Data da medição (opcional, preenchida automaticamente)
+	"""
+	logger.info(f"Atualizando alertas do ESP32 para compressor {data.id_compressor}")
+	try:
+		# Verificar se o compressor existe
+		@handle_firestore_exceptions
+		def verificar_compressor():
+			docs = list(db.collection("compressores").where("id_compressor", "==", data.id_compressor).limit(1).stream())
+			return len(docs) > 0
+		
+		compressor_existe = await run_in_threadpool(verificar_compressor)
+		if not compressor_existe:
+			logger.warning(f"Tentativa de atualizar alertas para compressor inexistente: {data.id_compressor}")
+			raise HTTPException(
+				status_code=404,
+				detail=f"Compressor com ID {data.id_compressor} não encontrado. Cadastre o compressor primeiro."
+			)
+		
+		# Preencher data_medicao se não foi informada
+		data_medicao = data.data_medicao or now_br()
+		
+		# Organizar alertas do ESP32 para atualizar no compressor
+		alertas_esp32 = {
+			"potencia": data.alerta_potencia.value,
+			"pressao": data.alerta_pressao.value,
+			"temperatura_ambiente": data.alerta_temperatura_ambiente.value,
+			"temperatura_equipamento": data.alerta_temperatura_equipamento.value,
+			"umidade": data.alerta_umidade.value,
+			"vibracao": data.alerta_vibracao.value
+		}
+		
+		# Atualizar alertas do compressor com os dados do ESP32
+		await atualizar_alertas_compressor(data.id_compressor, alertas_esp32)
+		
+		logger.info(f"Alertas do ESP32 atualizados com sucesso para compressor {data.id_compressor}: {alertas_esp32}")
+	
+		return ESP32AlertasOut(
+			id_compressor=data.id_compressor,
+			alertas_atualizados=alertas_esp32,
+			data_atualizacao=data_medicao
+		)
+	except Exception as e:
+		logger.error(f"Erro inesperado ao atualizar alertas do ESP32: {str(e)}")
+		raise HTTPException(status_code=500, detail=f"Erro ao atualizar alertas do ESP32: {str(e)}")
 
 
 @router.get("/dados")
@@ -208,6 +263,9 @@ async def get_compressor_data(
 	except Exception as e:
 		logger.error(f"Erro inesperado ao buscar dados do compressor {id_compressor}: {str(e)}")
 		raise HTTPException(status_code=500, detail=f"Erro ao buscar dados do compressor: {str(e)}")
+
+
+
 
 
 @router.get("/health")

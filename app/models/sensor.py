@@ -1,10 +1,18 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
 from typing import Optional
+from enum import Enum
+
+
+class NivelAlerta(str, Enum):
+    """Níveis de alerta possíveis."""
+    abaixo_do_normal = "abaixo_do_normal"
+    normal = "normal"
+    acima_do_normal = "acima_do_normal"
 
 
 class SensorData(BaseModel):
-    """Modelo para dados recebidos do sensor de compressor."""
+    """Modelo para dados recebidos do sensor de compressor (compatibilidade)."""
     id_compressor: int = Field(..., gt=0, description="ID único do compressor (número inteiro positivo)")
     ligado: bool = Field(..., description="Status do compressor (ligado/desligado)")
     pressao: float = Field(..., ge=0, description="Pressão atual em bar")
@@ -16,7 +24,29 @@ class SensorData(BaseModel):
     data_medicao: Optional[datetime] = Field(default=None, description="Data e hora da medição (opcional, será preenchida automaticamente se não informada)")
 
 
+class ESP32AlertasData(BaseModel):
+    """Modelo para atualização de alertas do ESP32 no compressor."""
+    id_compressor: int = Field(..., gt=0, description="ID único do compressor (número inteiro positivo)")
+    
+    # Alertas calculados pelo ESP32
+    alerta_potencia: NivelAlerta = Field(..., description="Nível de alerta para potência")
+    alerta_pressao: NivelAlerta = Field(..., description="Nível de alerta para pressão")
+    alerta_temperatura_ambiente: NivelAlerta = Field(..., description="Nível de alerta para temperatura ambiente")
+    alerta_temperatura_equipamento: NivelAlerta = Field(..., description="Nível de alerta para temperatura equipamento")
+    alerta_umidade: NivelAlerta = Field(..., description="Nível de alerta para umidade")
+    alerta_vibracao: NivelAlerta = Field(..., description="Nível de alerta para vibração")
+    
+    data_medicao: Optional[datetime] = Field(default=None, description="Data e hora da medição (opcional, será preenchida automaticamente se não informada)")
+
+
 class SensorOut(SensorData):
     """Modelo para dados retornados pela API."""
     firestore_id: str = Field(..., description="ID do documento no Firestore")
     data_medicao: datetime = Field(..., description="Data e hora da medição (sempre preenchida)")
+
+
+class ESP32AlertasOut(BaseModel):
+    """Modelo para resposta da atualização de alertas do ESP32."""
+    id_compressor: int = Field(..., description="ID do compressor atualizado")
+    alertas_atualizados: dict = Field(..., description="Alertas que foram atualizados")
+    data_atualizacao: datetime = Field(..., description="Data e hora da atualização dos alertas")
