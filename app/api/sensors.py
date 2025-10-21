@@ -171,12 +171,12 @@ async def update_esp32_alertas(data: ESP32AlertasData):
 		
 		# Organizar alertas do ESP32 para atualizar no compressor
 		alertas_esp32 = {
-			"potencia": data.alerta_potencia.value,
-			"pressao": data.alerta_pressao.value,
-			"temperatura_ambiente": data.alerta_temperatura_ambiente.value,
-			"temperatura_equipamento": data.alerta_temperatura_equipamento.value,
-			"umidade": data.alerta_umidade.value,
-			"corrente": data.alerta_corrente.value,
+			"potencia": data.alerta_potencia,
+			"pressao": data.alerta_pressao,
+			"temperatura_ambiente": data.alerta_temperatura_ambiente,
+			"temperatura_equipamento": data.alerta_temperatura_equipamento,
+			"umidade": data.alerta_umidade,
+			"corrente": data.alerta_corrente,
 			"vibracao": "detectada" if data.vibracao else "normal"
 		}
 		
